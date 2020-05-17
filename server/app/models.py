@@ -1,4 +1,4 @@
-from app import db
+from app import db, bcrypt
 
 
 class User(db.Model):
@@ -15,6 +15,18 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.username}>'
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def generate_hash(password: str) -> str:
+        return bcrypt.generate_password_hash(password)
+
+    @staticmethod
+    def compare_password_hash(password: str, password_hash: str) -> bool:
+        return bcrypt.check_password_hash(password_hash, password)
 
 
 class Question(db.Model):
