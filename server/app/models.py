@@ -1,4 +1,5 @@
 from app import db, bcrypt
+import enum
 
 
 class User(db.Model):
@@ -35,7 +36,7 @@ class Question(db.Model):
     answers = db.relationship('Answer', backref='question', lazy='dynamic')
 
     def __repr__(self):
-        return f'<Question {self.question}'
+        return f'<Question {self.question}>'
 
 
 class Answer(db.Model):
@@ -45,4 +46,32 @@ class Answer(db.Model):
     correct = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
-        return f'<Answer {self.answer}'
+        return f'<Answer {self.answer}>'
+
+
+class GameState(enum.Enum):
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+
+
+class Game(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    state = db.Column(db.Enum(GameState))
+    players = db.relationship("Player", backref="game", lazy="dynamic")
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def __repr__(self):
+        return f"<Game {self.id}>"
+
+
+class Player(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.String(36), db.ForeignKey("game.id"))
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
